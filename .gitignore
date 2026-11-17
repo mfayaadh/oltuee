@@ -1,0 +1,18 @@
+# Binaries
+oltuee
+oltuee.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Output
+bin/
+dist/
+
+# OS / Editor
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
