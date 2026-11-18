@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Vet and Test
+        run: |
+          go vet ./...
+          go test -race -v ./...
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build release archives
+        env:
+          CGO_ENABLED: "0"
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p release
+
+          build_tar() {
+            local os="$1" arch="$2"
+            local stage="stage-${os}-${arch}"
+            mkdir -p "$stage"
+            GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags="-s -w" -o "${stage}/oltuee" .
+            cp README.md README.id.md LICENSE "$stage/"
+            tar -C "$stage" -czf "release/oltuee_${TAG}_${os}_${arch}.tar.gz" .
+            rm -rf "$stage"
+          }
+
+          build_zip() {
+            local os="$1" arch="$2"
+            local stage="stage-${os}-${arch}"
+            mkdir -p "$stage"
+            GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags="-s -w" -o "${stage}/oltuee.exe" .
+            cp README.md README.id.md LICENSE "$stage/"
+            (cd "$stage" && zip -q "../release/oltuee_${TAG}_${os}_${arch}.zip" .)
+            rm -rf "$stage"
+          }
+
+          build_tar linux amd64
+          build_tar linux arm64
+          build_tar darwin amd64
+          build_tar darwin arm64
+          build_zip windows amd64
+          build_zip windows arm64
+
+          (cd release && sha256sum * > checksums.txt)
+          ls -lh release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release/oltuee_*.tar.gz
+            release/oltuee_*.zip
+            release/checksums.txt

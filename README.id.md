@@ -1,5 +1,8 @@
 # ⚡ OLTUEE — Sistem Manajemen OLT Berbasis Terminal (TUI)
 
+[![CI](https://github.com/mfayaadh/oltuee/actions/workflows/ci.yml/badge.svg)](https://github.com/mfayaadh/oltuee/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > **Language / Bahasa:** [English](README.md) | Bahasa Indonesia
 
 **OLTUEE** adalah aplikasi Terminal User Interface (TUI) yang ringan dan cepat untuk mengelola, memantau, dan mem-provisioning **OLT ZTE GPON** secara langsung melalui Telnet — dibangun menggunakan **Go** dan **Charmbracelet Bubble Tea**.
